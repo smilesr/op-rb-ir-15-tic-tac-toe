@@ -1,6 +1,28 @@
 class Player
-  attr_accessor :pick_square
+  attr_accessor :pick_square, :human_pick
 
+  def human_pick(ttboard, player)
+    puts "pick a square"
+    choice = gets.chomp.to_i
+    open = false
+    until open == true
+      if ttboard[choice] == "A"
+        if player == 0
+          ttboard[choice,1] = ["X"]
+        else
+          ttboard[choice,1] = ["O"]
+        end
+        open = true
+        return open
+      end
+      puts "that square is taken"
+      puts "choose another square:"
+      choice = gets.chomp.to_i
+    end
+    return ttboard
+  end
+
+  
   def pick_square(ttboard, player)
     choice = rand(0..9)
     open = false
@@ -85,7 +107,7 @@ class StartGame
     newgame.current_player
     game_end = false
     until game_end == true
-      newgame.current_player.pick_square(newgame.game_board, newgame.current_player_indice)
+      newgame.current_player.human_pick(newgame.game_board, newgame.current_player_indice)
       if newgame.game_over?
         game_end = true
       end
