@@ -1,9 +1,11 @@
+require 'pry'
+require 'pry-byebug'
 class Player
-  attr_accessor :pick_square, :human_pick
+  attr_accessor :pick_square, :human_pick, :player_type
 
-  def human_pick(ttboard, player)
-    puts "pick a square"
-    choice = gets.chomp.to_i
+  def pick_square(ttboard, player, player_type)
+    choice = pick_number(player_type)
+
     open = false
     until open == true
       if ttboard[choice] == "A"
@@ -15,30 +17,26 @@ class Player
         open = true
         return open
       end
-      puts "that square is taken"
-      puts "choose another square:"
-      choice = gets.chomp.to_i
+      if player_type == 1
+        puts "that square is taken"
+      end
+      pick_number(player_type)
     end
     return ttboard
   end
 
-  
-  def pick_square(ttboard, player)
-    choice = rand(0..9)
-    open = false
-    until open == true
-      if ttboard[choice] == "A"
-        if player == 0
-          ttboard[choice,1] = ["X"]
-        else
-          ttboard[choice,1] = ["O"]
-        end
-        open = true
-        return open
-      end
+  def player_type
+    @player_type
+  end
+
+  def pick_number(player_type)
+    if player_type == 2
+      puts "pick a square"
+      choice = gets.chomp.to_i
+    else
       choice = rand(0..9)
     end
-    return ttboard
+    return choice
   end
 end
 
@@ -92,6 +90,7 @@ class RunGame
     answer = gets.chomp
     if answer == 'y'
       go = StartGame.new
+      go.which_players
       go.start_it
     else
       puts "thanks for playing!"
@@ -101,13 +100,32 @@ class RunGame
 end
 
 class StartGame
+  def which_players
+    puts "how many human players?"
+    player_number = gets.chomp.to_i
+    if player_number > 2
+      puts "can't have more than 2 human players."
+      puts "how many human players?"
+      player_number = gets.chomp.to_i
+    end
+    case player_number
+    when 2
+      @player_type = 2
+    when 1
+      @player_type = 1
+    when 0
+      @player_type = 0
+    end
+  end
 
   def start_it
     newgame = RunGame.new
+    newgame.players[0].player_type = 2
+    newgame.players[1].player_type = 0
     newgame.current_player
     game_end = false
     until game_end == true
-      newgame.current_player.human_pick(newgame.game_board, newgame.current_player_indice)
+      newgame.current_player.pick_square(newgame.game_board, newgame.current_player_indice, @player_type)
       if newgame.game_over?
         game_end = true
       end
@@ -117,4 +135,5 @@ class StartGame
 end
 
 go = StartGame.new
+go.which_players
 go.start_it
