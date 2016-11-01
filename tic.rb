@@ -1,14 +1,16 @@
 require 'pry'
 require 'pry-byebug'
+
 class Player
-  attr_accessor :pick_square, :human_pick, :player_type
+  attr_accessor :pick_square, :player_type
 
   def pick_square(ttboard, player)
+
     choice = pick_number(player_type)
 
     open = false
     until open == true
-      if ttboard[choice] == "A"
+      if ttboard[choice] == "_"
         if player == 0
           ttboard[choice,1] = ["X"]
         else
@@ -19,11 +21,9 @@ class Player
           puts "robo player #{player} selects space #{choice}"
         end
         return open
-        # byebug
       end
       if player_type == 2
         puts "that square is taken"
-        # byebug
       end
       choice = pick_number(player_type)
     end
@@ -45,15 +45,22 @@ class Player
   end
 end
 
+class Display
+  def show_board(ttboard)
+    puts "#{ttboard[0]}|#{ttboard[1]}|#{ttboard[2]}\n#{ttboard[3]}|#{ttboard[4]}|#{ttboard[5]}\n#{ttboard[6]}|#{ttboard[7]}|#{ttboard[8]}"
+  end
+end
+
 class RunGame
   attr_accessor :players, :game_board, :current_player_indice
   
   WINNING_COMBO = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
 
   def initialize
-    @game_board = ["A","A","A","A","A","A","A","A","A",]
+    @game_board = ["_","_","_","_","_","_","_","_","_",]
     @players = [Player.new,Player.new]
     @current_player_indice = 0
+
   end
 
   def current_player
@@ -72,7 +79,7 @@ class RunGame
         declare_winner(letter)
       end
     end
-    tied = @game_board.all? {|space| space != "A"}
+    tied = @game_board.all? {|space| space != "_"}
     if tied == true
       declare_cats
     end
@@ -80,13 +87,11 @@ class RunGame
   
   def declare_winner(letter)
     puts "#{letter}'s have won"
-    puts "gameboard: #{game_board}"
     play_again
   end
 
   def declare_cats
     puts "the game ended in a tie!"
-    puts "gameboard: #{game_board}"
     play_again
   end
 
@@ -114,18 +119,11 @@ class StartGame
       @player_number = gets.chomp.to_i
     end
     @player_number
-    # case player_number
-    # when 2
-    #   @player_type = 2
-    # when 1
-    #   @player_type = 1
-    # when 0
-    #   @player_type = 0
-    # end
   end
 
   def start_it
     newgame = RunGame.new
+    display = Display.new
     case @player_number
     when 2
       newgame.players[0].player_type = 2
@@ -140,7 +138,9 @@ class StartGame
     newgame.current_player
     game_end = false
     until game_end == true
+      display.show_board(newgame.game_board)
       newgame.current_player.pick_square(newgame.game_board, newgame.current_player_indice)
+
       if newgame.game_over?
         game_end = true
       end
