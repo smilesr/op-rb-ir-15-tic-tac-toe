@@ -3,7 +3,7 @@ require 'pry-byebug'
 class Player
   attr_accessor :pick_square, :human_pick, :player_type
 
-  def pick_square(ttboard, player, player_type)
+  def pick_square(ttboard, player)
     choice = pick_number(player_type)
 
     open = false
@@ -15,12 +15,17 @@ class Player
           ttboard[choice,1] = ["O"]
         end
         open = true
+        if player_type == 1
+          puts "robo player #{player} selects space #{choice}"
+        end
         return open
+        # byebug
       end
-      if player_type == 1
+      if player_type == 2
         puts "that square is taken"
+        # byebug
       end
-      pick_number(player_type)
+      choice = pick_number(player_type)
     end
     return ttboard
   end
@@ -102,30 +107,40 @@ end
 class StartGame
   def which_players
     puts "how many human players?"
-    player_number = gets.chomp.to_i
-    if player_number > 2
+    @player_number = gets.chomp.to_i
+    if @player_number > 2
       puts "can't have more than 2 human players."
       puts "how many human players?"
-      player_number = gets.chomp.to_i
+      @player_number = gets.chomp.to_i
     end
-    case player_number
-    when 2
-      @player_type = 2
-    when 1
-      @player_type = 1
-    when 0
-      @player_type = 0
-    end
+    @player_number
+    # case player_number
+    # when 2
+    #   @player_type = 2
+    # when 1
+    #   @player_type = 1
+    # when 0
+    #   @player_type = 0
+    # end
   end
 
   def start_it
     newgame = RunGame.new
-    newgame.players[0].player_type = 2
-    newgame.players[1].player_type = 0
+    case @player_number
+    when 2
+      newgame.players[0].player_type = 2
+      newgame.players[1].player_type = 2
+    when 1
+      newgame.players[0].player_type = 2
+      newgame.players[1].player_type = 1
+    when 0
+      newgame.players[0].player_type = 1
+      newgame.players[1].player_type = 1
+    end
     newgame.current_player
     game_end = false
     until game_end == true
-      newgame.current_player.pick_square(newgame.game_board, newgame.current_player_indice, @player_type)
+      newgame.current_player.pick_square(newgame.game_board, newgame.current_player_indice)
       if newgame.game_over?
         game_end = true
       end
