@@ -4,39 +4,34 @@ require 'pry-byebug'
 class Player
   attr_accessor :pick_square, :player_type
 
-  def pick_square(ttboard, player)
-
-    choice = pick_number(player_type)
-
+  def pick_square(ttboard, player_indice)
+    player_indice == 0 ? @player_name = "X" : @player_name = "O"
+    choice = pick_number
     open = false
     until open == true
       if ttboard[choice] == "_"
-        if player == 0
+        if player_indice == 0
           ttboard[choice,1] = ["X"]
         else
           ttboard[choice,1] = ["O"]
         end
         open = true
-        if player_type == 1
-          puts "robo player #{player} selects space #{choice}"
+        if @player_type == "robot"
+          puts "Robo-Player #{@player_name} selects space #{choice}"
         end
         return open
       end
-      if player_type == 2
+      if @player_type == "human"
         puts "that square is taken"
       end
-      choice = pick_number(player_type)
+      choice = pick_number
     end
     return ttboard
   end
 
-  def player_type
-    @player_type
-  end
-
-  def pick_number(player_type)
-    if player_type == 2
-      puts "pick a square"
+  def pick_number
+    if @player_type == "human"
+      puts "Player #{@player_name}, pick a square"
       choice = gets.chomp.to_i
     else
       choice = rand(0..9)
@@ -60,7 +55,7 @@ class RunGame
     @game_board = ["_","_","_","_","_","_","_","_","_",]
     @players = [Player.new,Player.new]
     @current_player_indice = 0
-
+    @letter = ''
   end
 
   def current_player
@@ -72,11 +67,10 @@ class RunGame
   end
 
   def game_over?
-    letter = ""
-    @current_player_indice == 0 ? letter = "X" : letter = "O"
+    @current_player_indice == 0 ? @letter = "X" : @letter = "O"
     WINNING_COMBO.any? do |winning_set|
-      if winning_set.all? {|item| @game_board[item] == letter}      
-        declare_winner(letter)
+      if winning_set.all? {|item| @game_board[item] == @letter}      
+        declare_winner
       end
     end
     tied = @game_board.all? {|space| space != "_"}
@@ -85,8 +79,8 @@ class RunGame
     end
   end
   
-  def declare_winner(letter)
-    puts "#{letter}'s have won"
+  def declare_winner
+    puts "#{@letter}'s have won"
     play_again
   end
 
@@ -126,14 +120,11 @@ class StartGame
     display = Display.new
     case @player_number
     when 2
-      newgame.players[0].player_type = 2
-      newgame.players[1].player_type = 2
+      newgame.players[0].player_type, newgame.players[1].player_type = "human", "human"
     when 1
-      newgame.players[0].player_type = 2
-      newgame.players[1].player_type = 1
+      newgame.players[0].player_type, newgame.players[1].player_type = "human", "robot"
     when 0
-      newgame.players[0].player_type = 1
-      newgame.players[1].player_type = 1
+      newgame.players[0].player_type, newgame.players[1].player_type = "robot", "robot"
     end
     newgame.current_player
     game_end = false
